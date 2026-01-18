@@ -18,3 +18,21 @@ Before you begin, ensure you have the following installed:
 ## Running the app
 
 ```npx expo start```
+
+## Project Structure
+
+opik-hackathon-mobile/
+├── app/                 # 👈 Routes go here (File-based routing)
+│   ├── (tabs)/          # Group for tab screens
+│   ├── index.tsx        # Home screen
+│   └── _layout.tsx      # Navigation configuration
+├── src/                 # 👈 All logic/UI goes here
+│   ├── components/      # Reusable UI (Buttons, Cards)
+│   ├── constants/       # Colors, Fonts, Fixed strings
+│   ├── hooks/           # Custom React hooks (useAuth, useTheme)
+│   ├── services/        # API calls (axios, fetch functions)
+│   ├── types/           # TypeScript interfaces/types
+│   ├── utils/           # Helper functions (date formatting)
+│   └── assets/          # Images, Fonts (moved from root)
+├── index.ts             # Entry point (keep as is)
+└── tsconfig.json        # TS Config
