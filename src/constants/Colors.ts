@@ -1,20 +1,20 @@
 export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: '#0a7ea4',
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: '#0a7ea4',
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: '#fff',
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: '#fff',
-  },
+  // App Design System - Dark Theme
+  background: '#000000',
+  primaryAccent: '#8B80F9',
+  inputBackground: '#1F1F1F',
+
+  // Text Colors
+  textPrimary: '#FFFFFF',
+  textSecondary: '#888888',
+  textPlaceholder: '#666666',
+
+  // UI Elements
+  divider: '#333333',
+  buttonSecondary: '#1F1F1F',
+
+  // Border Radius
+  borderRadius: 12,
 } as const;
 
-export type ColorScheme = keyof typeof Colors;
+export type AppColors = typeof Colors;

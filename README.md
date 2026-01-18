@@ -36,3 +36,15 @@ opik-hackathon-mobile/
 │   └── assets/          # Images, Fonts (moved from root)
 ├── index.ts             # Entry point (keep as is)
 └── tsconfig.json        # TS Config
+
+
+## EAS
+
+### Initializing EAS with an Existing Project ID
+
+Use `eas init --id <project-id>` to link your local project to an existing EAS project on Expo's servers.
+
+### .easignore
+
+Copy the content of .gitignore to .easignore to avoid bundling environment
+variables or files with the app.
