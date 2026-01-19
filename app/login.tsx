@@ -18,8 +18,10 @@ export default function LoginScreen() {
   };
 
   const handleLogin = () => {
-    // TODO: Implement login logic
+    // TODO: Implement actual login logic
     console.log('Login pressed', { email, password });
+    // Navigate to the main tabs after login
+    router.replace('/(tabs)/home');
   };
 
   const handleForgotPassword = () => {
