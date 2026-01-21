@@ -27,6 +27,12 @@ export default function TabsLayout() {
           title: 'Friends',
         }}
       />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+        }}
+      />
     </Tabs>
   );
 }

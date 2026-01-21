@@ -17,7 +17,7 @@ const TAB_BAR_PADDING = 10;
 const TAB_ICON_SIZE = 26;
 const ACTIVE_INDICATOR_SIZE = TAB_BAR_HEIGHT - (TAB_BAR_PADDING * 2); // Slightly smaller than bar height
 
-type IconName = 'home' | 'waveform' | 'friends';
+type IconName = 'home' | 'waveform' | 'friends' | 'settings';
 
 const getIconComponent = (name: IconName, color: string, size: number) => {
   switch (name) {
@@ -28,6 +28,8 @@ const getIconComponent = (name: IconName, color: string, size: number) => {
       return <MaterialIcons name="multitrack-audio" size={size} color={color} />;
     case 'friends':
       return <Ionicons name="people" size={size} color={color} />;
+    case 'settings':
+      return <Ionicons name="settings-outline" size={size} color={color} />;
     default:
       return <MaterialCommunityIcons name="pentagon" size={size} color={color} />;
   }
@@ -41,6 +43,8 @@ const getIconName = (routeName: string): IconName => {
       return 'waveform';
     case 'friends':
       return 'friends';
+    case 'settings':
+      return 'settings';
     default:
       return 'home';
   }

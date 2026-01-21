@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -140,6 +141,7 @@ export default function HomeScreen() {
     console.log('Notifications pressed');
   };
 
+
   const handleRecord = () => {
     // Navigate to audio tab for recording
     router.push('/(tabs)/audio');
@@ -172,9 +174,12 @@ export default function HomeScreen() {
             </View>
             <Text style={styles.welcomeText}>Welcome Back Karam!</Text>
           </View>
-          <TouchableOpacity onPress={handleNotifications} style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={26} color={Colors.textPrimary} />
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity onPress={handleNotifications} style={styles.headerButton}>
+              <Ionicons name="notifications-outline" size={24} color={Colors.textPrimary} />
+            </TouchableOpacity>
+
+          </View>
         </View>
 
         {/* Voice Recording Card */}
@@ -271,7 +276,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  notificationButton: {
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerButton: {
     padding: 8,
   },
   recordingCard: {
