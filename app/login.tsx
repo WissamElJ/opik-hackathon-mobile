@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Dimensions, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Logo } from '@/components/Logo';
 import { Input } from '@/components/Input';
 import { Colors } from '@/constants/Colors';
+import { supabase } from '@/lib/supabase';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -12,16 +13,48 @@ export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCreateAccount = () => {
     router.push('/signup');
   };
 
-  const handleLogin = () => {
-    // TODO: Implement actual login logic
-    console.log('Login pressed', { email, password });
-    // Navigate to the main tabs after login
-    router.replace('/(tabs)/home');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter your email and password.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          Alert.alert(
+            'Email Not Verified',
+            'Please check your email and click the verification link before logging in.'
+          );
+        } else {
+          Alert.alert('Login Error', error.message);
+        }
+        return;
+      }
+
+      if (data.user) {
+        // Navigate to the main tabs after successful login
+        router.replace('/(tabs)/home');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -83,8 +116,14 @@ export default function LoginScreen() {
           </View>
 
           {/* Login Button */}
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Login</Text>
+          <TouchableOpacity 
+            style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <Text style={styles.loginButtonText}>
+              {isLoading ? 'Logging in...' : 'Login'}
+            </Text>
           </TouchableOpacity>
 
           {/* Forgot Password */}
@@ -164,6 +203,9 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     alignItems: 'center',
     marginBottom: 20,
+  },
+  loginButtonDisabled: {
+    opacity: 0.6,
   },
   loginButtonText: {
     color: Colors.textPrimary,

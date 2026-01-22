@@ -190,8 +190,8 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     height: TAB_BAR_HEIGHT,
     alignItems: 'center',
-    justifyContent: 'space-around', // Spread icons evenly
-    paddingHorizontal: TAB_BAR_PADDING, // Internal padding so active indicator doesn't touch edges
+    justifyContent: 'space-evenly', // Equal spacing including edges
+    paddingHorizontal: TAB_BAR_PADDING + 16, // Equal padding on both sides for breathing room
     paddingVertical: TAB_BAR_PADDING,
     shadowColor: '#000',
     shadowOffset: {
@@ -205,7 +205,8 @@ const styles = StyleSheet.create({
   tabButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20, // Extra horizontal spacing between icons
+    height: '100%',
+    flex: 1,
   },
   iconContainer: {
     width: ACTIVE_INDICATOR_SIZE,
