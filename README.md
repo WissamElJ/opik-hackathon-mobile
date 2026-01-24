@@ -15,6 +15,14 @@ Before you begin, ensure you have the following installed:
 ## Installation
 ```npm install```
 
+## Environment Setup
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+2. Open `.env` and update the variables with your own credentials.
+
 ## Running the app
 
 ```npx expo start```
@@ -51,6 +59,11 @@ opik-hackathon-mobile/
 
 └── tsconfig.json        # TS Config
 
+
+## Architecture & Data Access
+
+- **Authentication**: Implemented following the [Supabase React Native Quickstart Guide](https://supabase.com/docs/guides/auth/quickstarts/react-native).
+- **Direct Database Access**: The mobile app should **only** interact directly with the `auth` schema of the Supabase instance. It should not directly access other schemas/tables.
 
 ## EAS
 
