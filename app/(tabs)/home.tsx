@@ -90,8 +90,8 @@ export default function HomeScreen() {
 
 
   const handleRecord = () => {
-    // Navigate to audio tab for recording
-    router.push('/(tabs)/audio');
+    // Navigate to audio tab with chat mode
+    router.push('/(tabs)/audio?tab=plans');
   };
 
   const handleSeeAllMessages = () => {
@@ -143,14 +143,14 @@ export default function HomeScreen() {
               <MaterialCommunityIcons name="waveform" size={24} color={Colors.textPrimary} />
             </View>
             <View style={styles.recordingTextContainer}>
-              <Text style={styles.recordingTitle}>Tell us what you up to this week?</Text>
+              <Text style={styles.recordingTitle}>What's on your mind?</Text>
               <Text style={styles.recordingSubtitle}>
-                change your voice as you wish 🎙️
+               We'll help you interact with people better
               </Text>
             </View>
           </View>
           <TouchableOpacity style={styles.recordButton} onPress={handleRecord}>
-            <Text style={styles.recordButtonText}>Record</Text>
+            <Text style={styles.recordButtonText}>Tap to Chat</Text>
           </TouchableOpacity>
         </LinearGradient>
 
