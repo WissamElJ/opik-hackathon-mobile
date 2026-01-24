@@ -46,6 +46,7 @@ const CITIES = [
   'Prague',
   'Rome',
   'Stockholm',
+  'Strasbourg',
   'Vienna',
   'Warsaw',
   'Zurich',
