@@ -5,40 +5,13 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  FlatList,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/Colors';
-
-// Mock data for friend requests
-interface FriendRequest {
-  id: string;
-  name: string;
-  activity: string;
-  avatarColor: string;
-  avatarEmoji: string;
-}
-
-const FRIEND_REQUESTS: FriendRequest[] = [
-  {
-    id: '1',
-    name: 'Jane Delvaux',
-    activity: 'Padel',
-    avatarColor: '#4ECDC4',
-    avatarEmoji: '🧔',
-  },
-  {
-    id: '2',
-    name: 'Pia Kaliounji',
-    activity: 'Partying',
-    avatarColor: '#FF6B6B',
-    avatarEmoji: '👩',
-  },
-];
+import { ParamisIcon } from '@/components/ParamisIcon';
 
 // Mock data for messages
 interface Message {
@@ -83,39 +56,13 @@ const MESSAGES: Message[] = [
   },
 ];
 
-// Friend Request Card Component
-const FriendRequestCard: React.FC<{
-  request: FriendRequest;
-  onAccept: () => void;
-  onDismiss: () => void;
-}> = ({ request, onAccept, onDismiss }) => {
-  return (
-    <View style={styles.requestCard}>
-      <TouchableOpacity style={styles.dismissButton} onPress={onDismiss}>
-        <Ionicons name="close" size={18} color={Colors.textSecondary} />
-      </TouchableOpacity>
-      <View style={[styles.requestAvatar, { backgroundColor: request.avatarColor }]}>
-        <Text style={styles.requestAvatarEmoji}>{request.avatarEmoji}</Text>
-      </View>
-      <Text style={styles.requestName}>{request.name}</Text>
-      <Text style={styles.requestText}>
-        Is interested to join you{'\n'}
-        <Text style={styles.requestActivity}>{request.activity}</Text> this week!
-      </Text>
-      <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
-        <Text style={styles.acceptButtonText}>Accept</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
 // Message Card Component
-const MessageCard: React.FC<{ message: Message }> = ({ message }) => {
+const MessageCard: React.FC<{ message: Message; onPress: () => void }> = ({ message, onPress }) => {
   return (
-    <TouchableOpacity style={styles.messageCard} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.messageCard} activeOpacity={0.7} onPress={onPress}>
       <View style={[styles.messageAvatar, { backgroundColor: message.avatarColor }]}>
         {message.isApp ? (
-          <MaterialCommunityIcons name="waveform" size={24} color={Colors.textPrimary} />
+          <ParamisIcon size="small" />
         ) : (
           <Text style={styles.messageAvatarEmoji}>{message.avatarEmoji}</Text>
         )}
@@ -147,16 +94,18 @@ export default function HomeScreen() {
     router.push('/(tabs)/audio');
   };
 
-  const handleAcceptRequest = (id: string) => {
-    console.log('Accept request:', id);
-  };
-
-  const handleDismissRequest = (id: string) => {
-    console.log('Dismiss request:', id);
-  };
-
   const handleSeeAllMessages = () => {
     router.push('/messages');
+  };
+
+  const handleMessagePress = (message: Message) => {
+    if (message.isApp) {
+      // Navigate to Paramis chat for AI assistant messages
+      router.push('/paramis-chat');
+    } else {
+      // For regular messages, just log for now
+      console.log('Message pressed:', message.name);
+    }
   };
 
   return (
@@ -205,22 +154,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </LinearGradient>
 
-        {/* Friend Requests */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.requestsContainer}
-        >
-          {FRIEND_REQUESTS.map((request) => (
-            <FriendRequestCard
-              key={request.id}
-              request={request}
-              onAccept={() => handleAcceptRequest(request.id)}
-              onDismiss={() => handleDismissRequest(request.id)}
-            />
-          ))}
-        </ScrollView>
-
         {/* Messages Section */}
         <View style={styles.messagesHeader}>
           <Text style={styles.messagesTitle}>Messages</Text>
@@ -230,7 +163,7 @@ export default function HomeScreen() {
         </View>
 
         {MESSAGES.map((message) => (
-          <MessageCard key={message.id} message={message} />
+          <MessageCard key={message.id} message={message} onPress={() => handleMessagePress(message)} />
         ))}
       </ScrollView>
     </SafeAreaView>
@@ -327,74 +260,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  requestsContainer: {
-    paddingVertical: 8,
-    gap: 12,
-  },
-  requestCard: {
-    backgroundColor: Colors.tabBarBackground,
-    borderRadius: 16,
-    padding: 16,
-    width: 165,
-    marginRight: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.3)',
-  },
-  dismissButton: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    padding: 4,
-  },
-  requestAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  requestAvatarEmoji: {
-    fontSize: 28,
-  },
-  requestName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  requestText: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-  requestActivity: {
-    fontWeight: '600',
-    fontStyle: 'italic',
-    color: Colors.textPrimary,
-  },
-  acceptButton: {
-    backgroundColor: Colors.tabBarActive,
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 40,
-    width: '100%',
-    alignItems: 'center',
-  },
-  acceptButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
   messagesHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 8,
     marginBottom: 12,
   },
   messagesTitle: {
