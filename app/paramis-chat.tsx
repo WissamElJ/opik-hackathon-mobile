@@ -106,15 +106,15 @@ const MatchesCard: React.FC<{ onPress: () => void; matchCount: number }> = ({ on
 // Action buttons for swipe view
 const SwipeActions: React.FC<{
   onSkip: () => void;
-  onLike: () => void;
-}> = ({ onSkip, onLike }) => {
+  onConnect: () => void;
+}> = ({ onSkip, onConnect }) => {
   return (
     <View style={styles.actionsContainer}>
       <TouchableOpacity style={[styles.actionButton, styles.skipButton]} onPress={onSkip}>
         <Ionicons name="close" size={32} color="#FF6B6B" />
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.actionButton, styles.likeButton]} onPress={onLike}>
-        <Ionicons name="heart" size={32} color="#4ECDC4" />
+      <TouchableOpacity style={[styles.actionButton, styles.connectButton]} onPress={onConnect}>
+        <Ionicons name="checkmark" size={32} color="#4ECDC4" />
       </TouchableOpacity>
     </View>
   );
@@ -218,17 +218,17 @@ export default function ParamisChatScreen() {
                       />
                     ))}
                 </View>
-                <SwipeActions onSkip={handleSwipeLeft} onLike={handleSwipeRight} />
+                <SwipeActions onSkip={handleSwipeLeft} onConnect={handleSwipeRight} />
               </>
             ) : (
               /* No more profiles */
               <View style={styles.emptyContainer}>
                 <View style={styles.emptyIcon}>
-                  <Ionicons name="heart-dislike-outline" size={60} color={Colors.textSecondary} />
+                  <Ionicons name="people-outline" size={60} color={Colors.textSecondary} />
                 </View>
-                <Text style={styles.emptyTitle}>No More Matches</Text>
+                <Text style={styles.emptyTitle}>All Caught Up!</Text>
                 <Text style={styles.emptySubtitle}>
-                  You've seen all the potential matches for now. Check back later for more!
+                  You've seen all the suggested connections for now. Check back later for more!
                 </Text>
                 <TouchableOpacity style={styles.backToChatButton} onPress={() => setIsPublic(false)}>
                   <Text style={styles.backToChatText}>Back to Chat</Text>
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#FF6B6B',
   },
-  likeButton: {
+  connectButton: {
     backgroundColor: Colors.tabBarBackground,
     borderWidth: 2,
     borderColor: '#4ECDC4',

@@ -98,11 +98,11 @@ export const MatchOverlay: React.FC<MatchOverlayProps> = ({
 
           <Animated.View
             style={[
-              styles.heartContainer,
+              styles.linkContainer,
               { transform: [{ scale: heartScale }] },
             ]}
           >
-            <Ionicons name="heart" size={48} color="#FF6B9D" />
+            <Ionicons name="link" size={32} color="#8B5CF6" />
           </Animated.View>
 
           <Animated.View
@@ -115,11 +115,11 @@ export const MatchOverlay: React.FC<MatchOverlayProps> = ({
           </Animated.View>
         </View>
 
-        {/* Match Text */}
+        {/* Connection Text */}
         <Animated.View style={[styles.content, { transform: [{ scale: scaleAnim }] }]}>
-          <Text style={styles.matchTitle}>It's a Match!</Text>
+          <Text style={styles.matchTitle}>You're Connected!</Text>
           <Text style={styles.matchSubtitle}>
-            You and {profile.name} liked each other
+            You and {profile.name} want to connect
           </Text>
 
           {/* Buttons */}
@@ -128,8 +128,8 @@ export const MatchOverlay: React.FC<MatchOverlayProps> = ({
             <Text style={styles.messageButtonText}>Send a Message</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.keepSwipingButton} onPress={onClose}>
-            <Text style={styles.keepSwipingText}>Keep Swiping</Text>
+          <TouchableOpacity style={styles.keepBrowsingButton} onPress={onClose}>
+            <Text style={styles.keepBrowsingText}>Continue Browsing</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   avatarEmoji: {
     fontSize: 50,
   },
-  heartContainer: {
+  linkContainer: {
     marginHorizontal: -15,
     zIndex: 10,
     backgroundColor: Colors.textPrimary,
@@ -228,11 +228,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  keepSwipingButton: {
+  keepBrowsingButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
   },
-  keepSwipingText: {
+  keepBrowsingText: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.8)',
     fontWeight: '500',

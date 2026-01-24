@@ -109,14 +109,14 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
           style={styles.gradient}
         />
 
-        {/* LIKE stamp */}
-        <Animated.View style={[styles.stamp, styles.likeStamp, { opacity: likeOpacity }]}>
-          <Text style={styles.likeText}>LIKE</Text>
+        {/* CONNECT stamp */}
+        <Animated.View style={[styles.stamp, styles.connectStamp, { opacity: likeOpacity }]}>
+          <Text style={styles.connectText}>CONNECT</Text>
         </Animated.View>
 
-        {/* NOPE stamp */}
-        <Animated.View style={[styles.stamp, styles.nopeStamp, { opacity: nopeOpacity }]}>
-          <Text style={styles.nopeText}>NOPE</Text>
+        {/* SKIP stamp */}
+        <Animated.View style={[styles.stamp, styles.skipStamp, { opacity: nopeOpacity }]}>
+          <Text style={styles.skipText}>SKIP</Text>
         </Animated.View>
       </View>
 
@@ -182,22 +182,22 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderRadius: 8,
   },
-  likeStamp: {
+  connectStamp: {
     right: 20,
     borderColor: '#4ECDC4',
     transform: [{ rotate: '15deg' }],
   },
-  nopeStamp: {
+  skipStamp: {
     left: 20,
     borderColor: '#FF6B6B',
     transform: [{ rotate: '-15deg' }],
   },
-  likeText: {
-    fontSize: 32,
+  connectText: {
+    fontSize: 24,
     fontWeight: '900',
     color: '#4ECDC4',
   },
-  nopeText: {
+  skipText: {
     fontSize: 32,
     fontWeight: '900',
     color: '#FF6B6B',

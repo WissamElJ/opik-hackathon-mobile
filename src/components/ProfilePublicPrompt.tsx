@@ -72,25 +72,25 @@ export const ProfilePublicPrompt: React.FC<ProfilePublicPromptProps> = ({
 
           {/* Content */}
           <View style={styles.content}>
-            <Text style={styles.title}>Ready to Start Matching?</Text>
+            <Text style={styles.title}>Ready to Connect?</Text>
             <Text style={styles.description}>
-              Make your profile public so potential matches can discover you. 
-              You'll be able to see and connect with people who share your interests!
+              Be visible to these suggested connections so you can find activity partners,
+              friends, or collaborators who share your interests!
             </Text>
 
             {/* Benefits */}
             <View style={styles.benefitsContainer}>
               <View style={styles.benefitRow}>
                 <Ionicons name="checkmark-circle" size={20} color="#4ECDC4" />
-                <Text style={styles.benefitText}>Get discovered by like-minded people</Text>
+                <Text style={styles.benefitText}>Find activity partners nearby</Text>
               </View>
               <View style={styles.benefitRow}>
                 <Ionicons name="checkmark-circle" size={20} color="#4ECDC4" />
-                <Text style={styles.benefitText}>Swipe to connect with matches</Text>
+                <Text style={styles.benefitText}>Connect for sports, hobbies, or events</Text>
               </View>
               <View style={styles.benefitRow}>
                 <Ionicons name="checkmark-circle" size={20} color="#4ECDC4" />
-                <Text style={styles.benefitText}>Control who you connect with</Text>
+                <Text style={styles.benefitText}>You decide who to interact with</Text>
               </View>
             </View>
 
@@ -102,7 +102,7 @@ export const ProfilePublicPrompt: React.FC<ProfilePublicPromptProps> = ({
                 end={{ x: 1, y: 0 }}
                 style={styles.confirmButtonGradient}
               >
-                <Text style={styles.confirmButtonText}>Yes, Make My Profile Public</Text>
+                <Text style={styles.confirmButtonText}>Yes, Be Visible for These Interactions</Text>
               </LinearGradient>
             </TouchableOpacity>
 
