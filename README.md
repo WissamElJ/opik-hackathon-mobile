@@ -8,6 +8,7 @@ Before you begin, ensure you have the following installed:
 
 - **Node.js** (version 18 or higher recommended)
 - **npm** or **yarn** package manager
+- **Backend Agent**: The mobile app requires the backend agent to be running locally. Clone and set up [opik-hackathon-agent](https://github.com/yactouat/opik-hackathon-agent) following its README instructions.
 - **Expo Go** app installed on your mobile device:
   - [iOS App Store](https://apps.apple.com/app/expo-go/id982107779)
   - [Android Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
