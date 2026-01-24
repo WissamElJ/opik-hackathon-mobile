@@ -27,6 +27,10 @@ Before you begin, ensure you have the following installed:
 
 ```npx expo start```
 
+```npx expo start -c``` (to clear the cache)
+
+```npx expo start --tunnel -c``` (if all fails)
+
 ## Project Structure
 
 opik-hackathon-mobile/
