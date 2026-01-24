@@ -18,7 +18,13 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="audio"
         options={{
-          title: 'Audio',
+          title: 'Chat',
+        }}
+      />
+      <Tabs.Screen
+        name="interatctions"
+        options={{
+          title: 'Messages',
         }}
       />
       <Tabs.Screen
