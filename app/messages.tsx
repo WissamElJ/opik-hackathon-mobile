@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
+import { ParamisIcon } from '@/components/ParamisIcon';
 
 // Message interface
 interface Message {
@@ -116,7 +117,7 @@ const MessageCard: React.FC<{ message: Message; onPress: () => void }> = ({ mess
     <TouchableOpacity style={styles.messageCard} activeOpacity={0.7} onPress={onPress}>
       <View style={[styles.messageAvatar, { backgroundColor: message.avatarColor }]}>
         {message.isApp ? (
-          <MaterialCommunityIcons name="waveform" size={24} color={Colors.textPrimary} />
+          <ParamisIcon size="small" />
         ) : (
           <Text style={styles.messageAvatarEmoji}>{message.avatarEmoji}</Text>
         )}
@@ -145,8 +146,13 @@ export default function MessagesScreen() {
   };
 
   const handleMessagePress = (message: Message) => {
-    console.log('Message pressed:', message.name);
-    // TODO: Navigate to individual conversation
+    if (message.isApp) {
+      // Navigate to Paramis chat for AI assistant messages
+      router.push('/paramis-chat');
+    } else {
+      // For regular messages, just log for now
+      console.log('Message pressed:', message.name);
+    }
   };
 
   const renderMessage = ({ item }: { item: Message }) => (
