@@ -145,7 +145,7 @@ export default function HomeScreen() {
             <View style={styles.recordingTextContainer}>
               <Text style={styles.recordingTitle}>What's on your mind?</Text>
               <Text style={styles.recordingSubtitle}>
-                We'll help you find activity partners
+               We'll help you interact with people better
               </Text>
             </View>
           </View>
