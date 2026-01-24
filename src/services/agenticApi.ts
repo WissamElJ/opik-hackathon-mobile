@@ -26,6 +26,34 @@ export class AgenticApiService {
       return false;
     }
   }
+
+  /**
+   * Sync user metadata to the Agentic API
+   * @param metadata - The user metadata object from Supabase session
+   * @returns Promise<boolean> - true if sync was successful, false otherwise
+   */
+  async syncUser(metadata: Record<string, any>): Promise<boolean> {
+    try {
+      console.log('🔄 Syncing user metadata to API...');
+      const response = await fetch(`${this.baseUrl}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(metadata),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
+      }
+      
+      console.log('✅ User metadata synced successfully');
+      return true;
+    } catch (error) {
+      console.error('Error syncing user metadata:', error);
+      return false;
+    }
+  }
 }
 
 export const agenticApi = new AgenticApiService();

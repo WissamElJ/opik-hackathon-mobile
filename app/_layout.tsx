@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import Toast from 'react-native-toast-message';
 import { supabase } from '@/lib/supabase';
+import { agenticApi } from '@/services/agenticApi';
 
 export default function RootLayout() {
   useEffect(() => {
@@ -23,6 +25,20 @@ export default function RootLayout() {
           console.log('✅ User signed in:', session?.user?.email);
           console.log('📋 User metadata:', session?.user?.user_metadata);
           console.log('🆕 Is new user:', session?.user?.created_at === session?.user?.last_sign_in_at);
+
+          // Sync user metadata to Agentic API
+          if (session?.user?.user_metadata) {
+             agenticApi.syncUser(session.user.user_metadata).then((success) => {
+               if (!success) {
+                 Toast.show({
+                   type: 'error',
+                   text1: 'Error',
+                   text2: 'Something went wrong.',
+                   position: 'bottom',
+                 });
+               }
+             });
+          }
         }
 
         if (event === 'SIGNED_OUT') {
@@ -64,6 +80,7 @@ export default function RootLayout() {
           animation: 'fade',
         }}
       />
+      <Toast />
     </>
   );
 }
