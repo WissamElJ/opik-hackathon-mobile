@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { ParamisIcon } from '@/components/ParamisIcon';
+import { UserAvatar } from '@/components/UserAvatar';
 
 // Mock data for messages
 interface Message {
@@ -19,8 +20,7 @@ interface Message {
   preview: string;
   time: string;
   isUnread: boolean;
-  avatarColor: string;
-  avatarEmoji: string;
+  avatarUrl?: string | null;
   isApp?: boolean;
 }
 
@@ -31,8 +31,6 @@ const MESSAGES: Message[] = [
     preview: 'Hey Karam! 3 suggestions for thi...',
     time: '3 min ago',
     isUnread: true,
-    avatarColor: Colors.tabBarActive,
-    avatarEmoji: '',
     isApp: true,
   },
   {
@@ -41,8 +39,7 @@ const MESSAGES: Message[] = [
     preview: 'Will right back',
     time: '7 min ago',
     isUnread: false,
-    avatarColor: '#45B7D1',
-    avatarEmoji: '🧔',
+    avatarUrl: null, // No avatar, will show "FK" initials
   },
   {
     id: '3',
@@ -50,8 +47,7 @@ const MESSAGES: Message[] = [
     preview: 'Okay!',
     time: '2 days ago',
     isUnread: false,
-    avatarColor: '#96CEB4',
-    avatarEmoji: '👩',
+    avatarUrl: null, // No avatar, will show "CC" initials
   },
 ];
 
@@ -59,13 +55,17 @@ const MESSAGES: Message[] = [
 const MessageCard: React.FC<{ message: Message; onPress: () => void }> = ({ message, onPress }) => {
   return (
     <TouchableOpacity style={styles.messageCard} activeOpacity={0.7} onPress={onPress}>
-      <View style={[styles.messageAvatar, { backgroundColor: message.avatarColor }]}>
-        {message.isApp ? (
+      {message.isApp ? (
+        <View style={styles.paramisAvatar}>
           <ParamisIcon size="small" />
-        ) : (
-          <Text style={styles.messageAvatarEmoji}>{message.avatarEmoji}</Text>
-        )}
-      </View>
+        </View>
+      ) : (
+        <UserAvatar
+          name={message.name}
+          avatarUrl={message.avatarUrl}
+          size={50}
+        />
+      )}
       <View style={styles.messageContent}>
         <Text style={styles.messageName}>{message.name}</Text>
         <Text style={styles.messagePreview} numberOfLines={1}>
@@ -159,15 +159,13 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
   },
-  messageAvatar: {
+  paramisAvatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
+    backgroundColor: Colors.tabBarActive,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  messageAvatarEmoji: {
-    fontSize: 26,
   },
   messageContent: {
     flex: 1,

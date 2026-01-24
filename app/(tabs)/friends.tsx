@@ -5,61 +5,55 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
+import { UserAvatar } from '@/components/UserAvatar';
 
 // Mock friend data
 interface Friend {
   id: string;
   name: string;
   hashtags: string[];
-  avatarColor: string;
-  avatarEmoji: string;
+  avatarUrl?: string | null;
   audioDuration: string;
 }
 
 const MOCK_FRIENDS: Friend[] = [
   {
     id: '1',
-    name: 'Calvin',
+    name: 'Calvin Johnson',
     hashtags: ['#music', '#vibes'],
-    avatarColor: '#FF6B6B',
-    avatarEmoji: '😎',
+    avatarUrl: null, // Will show "CJ" initials
     audioDuration: '0:12',
   },
   {
     id: '2',
     name: 'Sarah',
     hashtags: ['#chill', '#weekend'],
-    avatarColor: '#4ECDC4',
-    avatarEmoji: '🎧',
+    avatarUrl: null, // Will show "SA" initials
     audioDuration: '0:05',
   },
   {
     id: '3',
-    name: 'Mike',
+    name: 'Mike Thompson',
     hashtags: ['#workout', '#motivation'],
-    avatarColor: '#45B7D1',
-    avatarEmoji: '💪',
+    avatarUrl: null, // Will show "MT" initials
     audioDuration: '0:08',
   },
   {
     id: '4',
     name: 'Emma',
     hashtags: ['#travel', '#adventure'],
-    avatarColor: '#96CEB4',
-    avatarEmoji: '✈️',
+    avatarUrl: null, // Will show "EM" initials
     audioDuration: '0:15',
   },
   {
     id: '5',
-    name: 'Alex',
+    name: 'Alex Chen',
     hashtags: ['#coding', '#tech'],
-    avatarColor: '#DDA0DD',
-    avatarEmoji: '👨‍💻',
+    avatarUrl: null, // Will show "AC" initials
     audioDuration: '0:03',
   },
 ];
@@ -95,9 +89,11 @@ const FriendCard: React.FC<FriendCardProps> = ({
   return (
     <View style={styles.card}>
       {/* Avatar */}
-      <View style={[styles.avatar, { backgroundColor: friend.avatarColor }]}>
-        <Text style={styles.avatarEmoji}>{friend.avatarEmoji}</Text>
-      </View>
+      <UserAvatar
+        name={friend.name}
+        avatarUrl={friend.avatarUrl}
+        size={50}
+      />
 
       {/* Details */}
       <View style={styles.details}>
@@ -192,16 +188,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.tabBarBackground,
     borderRadius: 16,
     padding: 14,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarEmoji: {
-    fontSize: 24,
   },
   details: {
     flex: 1,
