@@ -9,13 +9,16 @@ import {
   RefreshControl,
   Modal,
   Alert,
-  Switch,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/Colors';
+import { UserAvatar } from '@/components/UserAvatar';
 
 // Animated Switch Component
 const AnimatedSwitch: React.FC<{
@@ -208,6 +211,158 @@ const SkeletonLoader: React.FC = () => {
   );
 };
 
+// Profile data interface
+interface ProfileData {
+  username: string;
+  bio: string;
+  interests: string[];
+  avatarUrl: string | null;
+}
+
+// Edit Profile Modal Component
+const EditProfileModal: React.FC<{
+  visible: boolean;
+  onClose: () => void;
+  profile: ProfileData;
+  onSave: (profile: ProfileData) => void;
+}> = ({ visible, onClose, profile, onSave }) => {
+  const [username, setUsername] = useState(profile.username);
+  const [bio, setBio] = useState(profile.bio);
+  const [interestsText, setInterestsText] = useState(profile.interests.join(', '));
+  const slideAnim = useRef(new Animated.Value(300)).current;
+
+  useEffect(() => {
+    if (visible) {
+      // Reset form when opening
+      setUsername(profile.username);
+      setBio(profile.bio);
+      setInterestsText(profile.interests.join(', '));
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        speed: 20,
+        bounciness: 5,
+      }).start();
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: 300,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible, profile]);
+
+  const handleSave = () => {
+    if (!username.trim()) {
+      Alert.alert('Error', 'Username is required');
+      return;
+    }
+    
+    // Parse interests from comma-separated string
+    const interests = interestsText
+      .split(',')
+      .map((i) => i.trim())
+      .filter((i) => i.length > 0);
+    
+    onSave({
+      ...profile,
+      username: username.trim(),
+      bio: bio.trim(),
+      interests,
+    });
+    onClose();
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <KeyboardAvoidingView 
+        style={styles.modalOverlay} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
+          <Animated.View
+            style={[styles.editProfileSheet, { transform: [{ translateY: slideAnim }] }]}
+          >
+            <TouchableOpacity activeOpacity={1}>
+              <View style={styles.bottomSheetHandle} />
+              <Text style={styles.bottomSheetTitle}>Edit Profile</Text>
+              
+              {/* Avatar Preview */}
+              <View style={styles.avatarPreviewContainer}>
+                <UserAvatar name={username} avatarUrl={profile.avatarUrl} size={80} />
+                <TouchableOpacity style={styles.changeAvatarButton}>
+                  <Ionicons name="camera" size={16} color={Colors.textPrimary} />
+                </TouchableOpacity>
+              </View>
+              
+              {/* Username Field */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Username *</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={username}
+                  onChangeText={setUsername}
+                  placeholder="Enter your username"
+                  placeholderTextColor={Colors.textPlaceholder}
+                  autoCapitalize="none"
+                  maxLength={30}
+                />
+              </View>
+              
+              {/* Bio Field */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Bio (optional)</Text>
+                <TextInput
+                  style={[styles.textInput, styles.textAreaInput]}
+                  value={bio}
+                  onChangeText={setBio}
+                  placeholder="Tell us about yourself..."
+                  placeholderTextColor={Colors.textPlaceholder}
+                  multiline
+                  numberOfLines={3}
+                  maxLength={150}
+                  textAlignVertical="top"
+                />
+                <Text style={styles.characterCount}>{bio.length}/150</Text>
+              </View>
+              
+              {/* Interests Field */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Interests (optional)</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={interestsText}
+                  onChangeText={setInterestsText}
+                  placeholder="music, travel, coding..."
+                  placeholderTextColor={Colors.textPlaceholder}
+                  autoCapitalize="none"
+                />
+                <Text style={styles.inputHint}>Separate interests with commas</Text>
+              </View>
+              
+              {/* Action Buttons */}
+              <View style={styles.editProfileButtons}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={onClose}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSave}
+                >
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+};
+
 export default function SettingsScreen() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -216,6 +371,15 @@ export default function SettingsScreen() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [themeModalVisible, setThemeModalVisible] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState('dark');
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
+  
+  // Profile state
+  const [profile, setProfile] = useState<ProfileData>({
+    username: 'Karam',
+    bio: '',
+    interests: [],
+    avatarUrl: null,
+  });
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -225,7 +389,11 @@ export default function SettingsScreen() {
   };
 
   const handleEditProfile = () => {
-    console.log('Edit profile pressed');
+    setEditProfileVisible(true);
+  };
+  
+  const handleSaveProfile = (updatedProfile: ProfileData) => {
+    setProfile(updatedProfile);
   };
 
   const handleLogout = () => {
@@ -278,13 +446,27 @@ export default function SettingsScreen() {
         />
         {/* Profile Card */}
         <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarInitials}>KA</Text>
-          </View>
+          <UserAvatar 
+            name={profile.username} 
+            avatarUrl={profile.avatarUrl} 
+            size={56} 
+          />
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Karam</Text>
-            <Text style={styles.profileRole}>Premium Member</Text>
+            <Text style={styles.profileName}>{profile.username}</Text>
+            {profile.bio ? (
+              <Text style={styles.profileBio} numberOfLines={1}>{profile.bio}</Text>
+            ) : (
+              <Text style={styles.profileRole}>Premium Member</Text>
+            )}
+            {profile.interests.length > 0 && (
+              <Text style={styles.profileInterests} numberOfLines={1}>
+                {profile.interests.join(' • ')}
+              </Text>
+            )}
           </View>
+          <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
+            <Ionicons name="pencil" size={18} color={Colors.tabBarActive} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -468,6 +650,14 @@ export default function SettingsScreen() {
           <Text style={styles.bottomSheetButtonText}>Cancel</Text>
         </TouchableOpacity>
       </BottomSheet>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        visible={editProfileVisible}
+        onClose={() => setEditProfileVisible(false)}
+        profile={profile}
+        onSave={handleSaveProfile}
+      />
     </SafeAreaView>
   );
 }
@@ -520,21 +710,9 @@ const styles = StyleSheet.create({
     elevation: 10,
     zIndex: 10,
   },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.tabBarActive,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarInitials: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-  },
   profileInfo: {
-    gap: 4,
+    flex: 1,
+    gap: 2,
   },
   profileName: {
     fontSize: 18,
@@ -544,6 +722,15 @@ const styles = StyleSheet.create({
   profileRole: {
     fontSize: 14,
     color: Colors.textSecondary,
+  },
+  profileBio: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  profileInterests: {
+    fontSize: 12,
+    color: Colors.tabBarActive,
+    marginTop: 2,
   },
   editButton: {
     width: 40,
@@ -719,5 +906,96 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.tabBarBackground,
     borderRadius: 16,
     marginBottom: 20,
+  },
+  // Edit Profile Modal Styles
+  editProfileSheet: {
+    backgroundColor: Colors.tabBarBackground,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+    maxHeight: '90%',
+  },
+  avatarPreviewContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+    position: 'relative',
+  },
+  changeAvatarButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: '35%',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.tabBarActive,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: Colors.tabBarBackground,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: Colors.inputBackground,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: Colors.textPrimary,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  textAreaInput: {
+    height: 80,
+    paddingTop: 14,
+  },
+  characterCount: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'right',
+    marginTop: 4,
+  },
+  inputHint: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 4,
+  },
+  editProfileButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.textSecondary,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+  },
+  saveButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: Colors.tabBarActive,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textPrimary,
   },
 });

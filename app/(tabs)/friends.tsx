@@ -1,156 +1,122 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   View,
   Text,
   FlatList,
-  TouchableOpacity,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
+import { UserAvatar } from '@/components/UserAvatar';
 
-// Mock friend data
+// Mock friend data with connection context
 interface Friend {
   id: string;
   name: string;
-  hashtags: string[];
-  avatarColor: string;
-  avatarEmoji: string;
-  audioDuration: string;
+  avatarUrl?: string | null;
+  connectedAt: Date;
+  location: string;
 }
+
+// Helper to format relative time
+const getRelativeTime = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffWeeks = Math.floor(diffDays / 7);
+  const diffMonths = Math.floor(diffDays / 30);
+
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffWeeks < 4) return `${diffWeeks}w ago`;
+  return `${diffMonths}mo ago`;
+};
 
 const MOCK_FRIENDS: Friend[] = [
   {
     id: '1',
-    name: 'Calvin',
-    hashtags: ['#music', '#vibes'],
-    avatarColor: '#FF6B6B',
-    avatarEmoji: '😎',
-    audioDuration: '0:12',
+    name: 'Calvin Johnson',
+    avatarUrl: null,
+    connectedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    location: 'Blue Note Jazz Club',
   },
   {
     id: '2',
     name: 'Sarah',
-    hashtags: ['#chill', '#weekend'],
-    avatarColor: '#4ECDC4',
-    avatarEmoji: '🎧',
-    audioDuration: '0:05',
+    avatarUrl: null,
+    connectedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+    location: 'Central Park',
   },
   {
     id: '3',
-    name: 'Mike',
-    hashtags: ['#workout', '#motivation'],
-    avatarColor: '#45B7D1',
-    avatarEmoji: '💪',
-    audioDuration: '0:08',
+    name: 'Mike Thompson',
+    avatarUrl: null,
+    connectedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
+    location: 'Equinox Gym SoHo',
   },
   {
     id: '4',
     name: 'Emma',
-    hashtags: ['#travel', '#adventure'],
-    avatarColor: '#96CEB4',
-    avatarEmoji: '✈️',
-    audioDuration: '0:15',
+    avatarUrl: null,
+    connectedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 2 weeks ago
+    location: 'JFK Terminal 4',
   },
   {
     id: '5',
-    name: 'Alex',
-    hashtags: ['#coding', '#tech'],
-    avatarColor: '#DDA0DD',
-    avatarEmoji: '👨‍💻',
-    audioDuration: '0:03',
+    name: 'Alex Chen',
+    avatarUrl: null,
+    connectedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000), // ~1.5 months ago
+    location: 'TechCrunch Disrupt',
   },
 ];
 
-// Animated waveform component for playing state
-const AudioWaveform: React.FC = () => {
-  return (
-    <View style={styles.waveformContainer}>
-      {[0.4, 0.7, 1, 0.6, 0.8, 0.5, 0.9, 0.3].map((height, index) => (
-        <View
-          key={index}
-          style={[
-            styles.waveformBar,
-            { height: 16 * height },
-          ]}
-        />
-      ))}
-    </View>
-  );
-};
-
 interface FriendCardProps {
   friend: Friend;
-  isPlaying: boolean;
-  onPlayPress: () => void;
 }
 
-const FriendCard: React.FC<FriendCardProps> = ({
-  friend,
-  isPlaying,
-  onPlayPress,
-}) => {
+const FriendCard: React.FC<FriendCardProps> = ({ friend }) => {
+  const relativeTime = getRelativeTime(friend.connectedAt);
+
   return (
     <View style={styles.card}>
       {/* Avatar */}
-      <View style={[styles.avatar, { backgroundColor: friend.avatarColor }]}>
-        <Text style={styles.avatarEmoji}>{friend.avatarEmoji}</Text>
-      </View>
+      <UserAvatar
+        name={friend.name}
+        avatarUrl={friend.avatarUrl}
+        size={56}
+      />
 
       {/* Details */}
       <View style={styles.details}>
-        <Text style={styles.name}>{friend.name}</Text>
-        <Text style={styles.hashtags}>{friend.hashtags.join(' ')}</Text>
-      </View>
-
-      {/* Audio Controls */}
-      <View style={styles.audioControls}>
-        {isPlaying ? (
-          <AudioWaveform />
-        ) : (
-          <Text style={styles.duration}>{friend.audioDuration}</Text>
-        )}
-        <TouchableOpacity
-          style={styles.playButton}
-          onPress={onPlayPress}
-          activeOpacity={0.7}
-        >
-          {isPlaying ? (
-            <Ionicons name="pause" size={18} color={Colors.textPrimary} />
-          ) : (
-            <Ionicons name="play" size={18} color={Colors.textPrimary} style={styles.playIcon} />
-          )}
-        </TouchableOpacity>
+        <View style={styles.nameRow}>
+          <Text style={styles.name}>{friend.name}</Text>
+          <Text style={styles.timeAgo}>{relativeTime}</Text>
+        </View>
+        
+        {/* Connection context */}
+        <View style={styles.locationRow}>
+          <Ionicons name="location-outline" size={14} color={Colors.tabBarActive} />
+          <Text style={styles.location}>{friend.location}</Text>
+        </View>
       </View>
     </View>
   );
 };
 
 export default function FriendsScreen() {
-  const [playingId, setPlayingId] = useState<string | null>('1'); // Calvin is playing by default
-
-  const handlePlayPress = (friendId: string) => {
-    if (playingId === friendId) {
-      setPlayingId(null);
-    } else {
-      setPlayingId(friendId);
-    }
-  };
-
   const renderFriend = ({ item }: { item: Friend }) => (
-    <FriendCard
-      friend={item}
-      isPlaying={playingId === item.id}
-      onPlayPress={() => handlePlayPress(item.id)}
-    />
+    <FriendCard friend={item} />
   );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Friends</Text>
+        <Text style={styles.subtitle}>{MOCK_FRIENDS.length} connections</Text>
       </View>
       <FlatList
         data={MOCK_FRIENDS}
@@ -179,76 +145,52 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.textPrimary,
   },
+  subtitle: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    marginTop: 4,
+  },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 120, // Account for floating tab bar
+    paddingBottom: 120,
   },
   separator: {
     height: 12,
   },
   card: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: Colors.tabBarBackground,
     borderRadius: 16,
-    padding: 14,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarEmoji: {
-    fontSize: 24,
+    padding: 16,
   },
   details: {
     flex: 1,
     marginLeft: 14,
   },
+  nameRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   name: {
     fontSize: 17,
     fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: 4,
   },
-  hashtags: {
-    fontSize: 14,
+  timeAgo: {
+    fontSize: 13,
     color: Colors.textSecondary,
   },
-  audioControls: {
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 4,
   },
-  duration: {
+  location: {
     fontSize: 14,
-    color: Colors.textSecondary,
-    minWidth: 36,
-    textAlign: 'right',
-  },
-  waveformContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    height: 20,
-    minWidth: 50,
-  },
-  waveformBar: {
-    width: 3,
-    backgroundColor: Colors.tabBarActive,
-    borderRadius: 2,
-  },
-  playButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.tabBarActive,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playIcon: {
-    marginLeft: 2, // Optical centering for play triangle
+    color: Colors.tabBarActive,
+    fontWeight: '500',
   },
 });
