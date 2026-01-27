@@ -107,11 +107,13 @@ export const InteractionNoteModal: React.FC<InteractionNoteModalProps> = ({
   const [inputMode, setInputMode] = useState<InputMode>('voice');
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const slideAnim = useRef(new Animated.Value(400)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (visible) {
+    if (visible && !isAnimatingOut) {
       setNote('');
       setInputMode('voice');
       setIsRecording(false);
@@ -129,12 +131,43 @@ export const InteractionNoteModal: React.FC<InteractionNoteModalProps> = ({
           speed: 20,
           bounciness: 5,
         }),
+        Animated.timing(overlayOpacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
       ]).start();
-    } else {
+    } else if (!visible) {
       slideAnim.setValue(400);
       scaleAnim.setValue(0.9);
+      overlayOpacity.setValue(0);
+      setIsAnimatingOut(false);
     }
   }, [visible]);
+
+  const animateOut = (callback: () => void) => {
+    setIsAnimatingOut(true);
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 400,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.9,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setIsAnimatingOut(false);
+      callback();
+    });
+  };
 
   const handleRecord = () => {
     if (isRecording) {
@@ -150,17 +183,29 @@ export const InteractionNoteModal: React.FC<InteractionNoteModalProps> = ({
 
   const handleSave = () => {
     if (inputMode === 'voice' && hasRecording) {
-      onSave('[Voice Note]', true);
-      onClose();
+      animateOut(() => {
+        onSave('[Voice Note]', true);
+        onClose();
+      });
     } else if (inputMode === 'text' && note.trim()) {
-      onSave(note.trim(), false);
-      onClose();
+      animateOut(() => {
+        onSave(note.trim(), false);
+        onClose();
+      });
     }
   };
 
   const handleSkip = () => {
-    onSkip();
-    onClose();
+    animateOut(() => {
+      onSkip();
+      onClose();
+    });
+  };
+
+  const handleCloseModal = () => {
+    animateOut(() => {
+      onClose();
+    });
   };
 
   const canSave = (inputMode === 'voice' && hasRecording) || (inputMode === 'text' && note.trim());
@@ -168,11 +213,12 @@ export const InteractionNoteModal: React.FC<InteractionNoteModalProps> = ({
   if (!connection) return null;
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={handleCloseModal}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
       >
+        <Animated.View style={[StyleSheet.absoluteFill, styles.overlayBackground, { opacity: overlayOpacity }]} />
         <Animated.View
           style={[
             styles.container,
@@ -275,10 +321,12 @@ export const InteractionNoteModal: React.FC<InteractionNoteModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  overlayBackground: {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   container: {
     width: '100%',
