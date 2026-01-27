@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import { Colors } from '@/constants/Colors';
 import { InteractionNoteModal } from '@/components/InteractionNoteModal';
 
@@ -26,17 +27,35 @@ const MOCK_CONNECTION = {
 
 export default function ScanScreen() {
   const router = useRouter();
-  const [isScanning, setIsScanning] = useState(true);
+  const [permission, requestPermission] = useCameraPermissions();
+  const [scanned, setScanned] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [scannedConnection, setScannedConnection] = useState<typeof MOCK_CONNECTION | null>(null);
 
-  const handleBack = () => {
-    router.back();
+  const goToHome = () => {
+    router.replace('/(tabs)/home');
   };
 
-  // Simulate a successful scan (in real app, this would be triggered by camera)
+  const handleBack = () => {
+    goToHome();
+  };
+
+  // Handle barcode scan from camera
+  const handleBarCodeScanned = (result: BarcodeScanningResult) => {
+    if (scanned) return;
+    
+    setScanned(true);
+    console.log('Scanned QR code:', result.data);
+    
+    // TODO: Parse QR data and fetch real connection info
+    // For now, use mock data
+    setScannedConnection(MOCK_CONNECTION);
+    setShowNoteModal(true);
+  };
+
+  // Simulate a successful scan (for testing purposes)
   const handleSimulateScan = () => {
-    setIsScanning(false);
+    setScanned(true);
     setScannedConnection(MOCK_CONNECTION);
     setShowNoteModal(true);
   };
@@ -44,19 +63,78 @@ export default function ScanScreen() {
   const handleSaveNote = (note: string) => {
     console.log('Saving interaction note:', note, 'for connection:', scannedConnection?.name);
     // TODO: Save note to database
-    router.back();
+    goToHome();
   };
 
   const handleSkipNote = () => {
     console.log('Skipped note for:', scannedConnection?.name);
-    router.back();
+    goToHome();
   };
 
   const handleCloseModal = () => {
     setShowNoteModal(false);
-    router.back();
+    setScanned(false); // Reset to allow scanning again
+    goToHome();
   };
 
+  // Permission not yet determined
+  if (!permission) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={28} color={Colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Scan QR Code</Text>
+          <View style={styles.headerRight} />
+        </View>
+        <View style={styles.permissionContainer}>
+          <Text style={styles.permissionText}>Loading camera...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Permission denied - show request UI
+  if (!permission.granted) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={28} color={Colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Scan QR Code</Text>
+          <View style={styles.headerRight} />
+        </View>
+        <View style={styles.permissionContainer}>
+          <View style={styles.permissionIconContainer}>
+            <Ionicons name="camera-outline" size={64} color={Colors.textSecondary} />
+          </View>
+          <Text style={styles.permissionTitle}>Camera Access Required</Text>
+          <Text style={styles.permissionText}>
+            We need access to your camera to scan QR codes and connect with others.
+          </Text>
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={requestPermission}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#8B5CF6', '#6366F1']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.permissionButtonGradient}
+            >
+              <Ionicons name="camera" size={20} color={Colors.textPrimary} />
+              <Text style={styles.permissionButtonText}>Allow Camera Access</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Permission granted - show camera
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Header */}
@@ -68,54 +146,60 @@ export default function ScanScreen() {
         <View style={styles.headerRight} />
       </View>
 
-      {/* Camera View Placeholder */}
+      {/* Camera View */}
       <View style={styles.cameraContainer}>
-        {/* Simulated camera background */}
-        <LinearGradient
-          colors={['#1A1A1A', '#2D2D2D', '#1A1A1A']}
-          style={styles.cameraBackground}
+        <CameraView
+          style={styles.camera}
+          facing="back"
+          barcodeScannerSettings={{
+            barcodeTypes: ['qr'],
+          }}
+          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         />
 
-        {/* Scan Frame */}
-        <View style={styles.scanFrame}>
-          {/* Corner decorations */}
-          <View style={[styles.corner, styles.topLeft]} />
-          <View style={[styles.corner, styles.topRight]} />
-          <View style={[styles.corner, styles.bottomLeft]} />
-          <View style={[styles.corner, styles.bottomRight]} />
+        {/* Overlay with scan frame */}
+        <View style={styles.overlay}>
+          {/* Scan Frame */}
+          <View style={styles.scanFrame}>
+            {/* Corner decorations */}
+            <View style={[styles.corner, styles.topLeft]} />
+            <View style={[styles.corner, styles.topRight]} />
+            <View style={[styles.corner, styles.bottomLeft]} />
+            <View style={[styles.corner, styles.bottomRight]} />
 
-          {/* Scanning line animation placeholder */}
-          {isScanning && (
-            <View style={styles.scanLine} />
-          )}
-        </View>
+            {/* Scanning line */}
+            {!scanned && (
+              <View style={styles.scanLine} />
+            )}
+          </View>
 
-        {/* Instructions */}
-        <Text style={styles.instructions}>
-          Position the QR code within the frame
-        </Text>
+          {/* Instructions */}
+          <Text style={styles.instructions}>
+            Position the QR code within the frame
+          </Text>
 
-        {/* Simulate Scan Button (for demo purposes) */}
-        <TouchableOpacity
-          style={styles.simulateButton}
-          onPress={handleSimulateScan}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={['#8B5CF6', '#6366F1']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.simulateButtonGradient}
+          {/* Simulate Scan Button (for testing) */}
+          <TouchableOpacity
+            style={styles.simulateButton}
+            onPress={handleSimulateScan}
+            activeOpacity={0.8}
           >
-            <Ionicons name="qr-code" size={20} color={Colors.textPrimary} />
-            <Text style={styles.simulateButtonText}>Simulate Scan</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+            <LinearGradient
+              colors={['#8B5CF6', '#6366F1']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.simulateButtonGradient}
+            >
+              <Ionicons name="qr-code" size={20} color={Colors.textPrimary} />
+              <Text style={styles.simulateButtonText}>Simulate Scan</Text>
+            </LinearGradient>
+          </TouchableOpacity>
 
-        {/* Helper text */}
-        <Text style={styles.helperText}>
-          Scan someone's QR code to connect with them
-        </Text>
+          {/* Helper text */}
+          <Text style={styles.helperText}>
+            Scan someone's QR code to connect with them
+          </Text>
+        </View>
       </View>
 
       {/* Interaction Note Modal */}
@@ -141,6 +225,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    zIndex: 10,
   },
   backButton: {
     padding: 4,
@@ -154,20 +239,73 @@ const styles = StyleSheet.create({
   headerRight: {
     width: 32,
   },
-  cameraContainer: {
+  // Permission UI
+  permissionContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  permissionIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  permissionTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  permissionText: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 32,
+  },
+  permissionButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  permissionButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  permissionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  // Camera
+  cameraContainer: {
+    flex: 1,
     position: 'relative',
   },
-  cameraBackground: {
+  camera: {
     ...StyleSheet.absoluteFillObject,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   scanFrame: {
     width: SCAN_AREA_SIZE,
     height: SCAN_AREA_SIZE,
     position: 'relative',
     marginBottom: 40,
+    backgroundColor: 'transparent',
   },
   corner: {
     position: 'absolute',
@@ -214,9 +352,12 @@ const styles = StyleSheet.create({
   },
   instructions: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 32,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   simulateButton: {
     borderRadius: 14,
@@ -238,8 +379,11 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: Colors.textPrimary,
     textAlign: 'center',
     paddingHorizontal: 40,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 });
